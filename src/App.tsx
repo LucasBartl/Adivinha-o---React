@@ -16,6 +16,11 @@ export default function App() {
   const [letterUsed, serLetterUsed] = useState<LetterUsedProps[]>([])
   const [challenge, setChallenge] = useState<Challenge | null>(null)
 
+
+  const ATTEMPT_MARGIN = 5
+
+
+
   /* Restart Game */
 
   function handleRestart() {
@@ -50,11 +55,12 @@ export default function App() {
     const exist = letterUsed.find((used) => used.value.toLocaleUpperCase() === value)
 
     if (exist) {
+      setLetter("")
       return alert("Letra já utilizada ")
     }
 
     //Filtra a quantidades de letras corretas
-    const hits = challenge.word.toLocaleUpperCase().split("").filter((char) => { char === value }).length
+    const hits = challenge.word.toLocaleUpperCase().split("").filter((char) =>  char === value ).length
 
     const correct = hits > 0
     const currentScore = score + hits
@@ -71,6 +77,39 @@ export default function App() {
     startGame()
   }, [])
 
+
+
+  function endGame(message: string) {
+    alert(message)
+    startGame()
+  }
+
+
+  /* Identificar final do jogo */
+
+  useEffect(() => {
+
+    if (!challenge) {
+      return
+    }
+    setTimeout(() => {
+      if (score === challenge.word.length) {
+        return endGame("Parabéns, você descobriu a palavra")
+      }
+      const ATTEMPT_LIMIT = challenge.word.length + ATTEMPT_MARGIN
+
+      if (letterUsed.length === ATTEMPT_LIMIT) {
+        return endGame("Perdeu, tente novamente")
+      }
+    }
+
+
+
+      , 200)
+  }, [score, letterUsed.length])
+
+
+
   if (!challenge) {
     return
   }
@@ -80,16 +119,19 @@ export default function App() {
   return (
     <div className={styles.container}>
       <main>
-        <Header current={score} max={10} onRestart={handleRestart}></Header>
+        <Header current={letterUsed.length}
+          max={challenge.word.length + ATTEMPT_MARGIN}
+          onRestart={handleRestart}></Header>
         <Tip tip={challenge.tip}></Tip>
 
 
         <div className={styles.word}>
           {
             challenge.word.split("").map((letter, index) => {
-              const letterused = letterUsed.filter((used)=> used.value.toLocaleUpperCase() === letter.toLocaleUpperCase())
+              const letterused = letterUsed.find(
+                (used) => used.value.toLocaleUpperCase() === letter.toLocaleUpperCase())
 
-              return <Letter key={index} value="" />
+              return <Letter key={index} value={letterused?.value} color={letterused?.correct ? "correct" : "default"} />
 
             }
             )
