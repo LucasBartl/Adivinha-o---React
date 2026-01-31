@@ -24,7 +24,10 @@ export default function App() {
   /* Restart Game */
 
   function handleRestart() {
-    alert("Reiniciar o jogo")
+    const isConfirmed = window.confirm("Você tem certeza? ")
+    if(isConfirmed){
+      startGame()
+    }
   }
 
   /* Inicio Game */
